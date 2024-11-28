@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalorienbedarf Rechner</title>
+</head>
+<body>
+    <h1>Kalorienbedarf Rechner - ITL 12 - Florian Pongritz  </h1>
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Eingabewerte speichern
+        $geschlecht = $_POST['geschlecht'];
+        $alter = (int)$_POST['alter'];
+        $gewicht = (float)$_POST['gewicht'];
+        $groesse = (float)$_POST['groesse'];
+        $schlafen = (float)$_POST['schlafen'];
+        $sitzen = (float)$_POST['sitzen'];
+        $buero = (float)$_POST['buero'];
+        $stehen = (float)$_POST['stehen'];
+        $aktive_zeit = 24 - $schlafen - $sitzen - $buero - $stehen;
+
+        // Grundumsatz berechnen
+        if ($geschlecht === 'weiblich') {
+            $grundumsatz = 655.1 + (9.6 * $gewicht) + (1.8 * $groesse) - (4.7 * $alter);
+        } else {
+            $grundumsatz = 66.47 + (13.7 * $gewicht) + (5 * $groesse) - (6.8 * $alter);
+        }
+
+        // PAL Faktoren
+        $pal_schlafen = 0.95;
+        $pal_sitzen = 1.2;
+        $pal_buero = 1.45;
+        $pal_stehen = 1.85;
+        $pal_aktiv = 2.0; // Beispielwert für sonstige Aktivitäten
+
+        // Durchschnittlicher PAL berechnen
+        $durchschnitt_pal = (
+            $schlafen * $pal_schlafen +
+            $sitzen * $pal_sitzen +
+            $buero * $pal_buero +
+            $stehen * $pal_stehen +
+            $aktive_zeit * $pal_aktiv
+        ) / 24;
+
+        // Gesamtbedarf berechnen
+        $kalorienbedarf = $grundumsatz * $durchschnitt_pal;
+
+        echo "<h2>Ergebnisse</h2>";
+        echo "<p>Grundumsatz: " . round($grundumsatz, 2) . " kcal</p>"; // round ist für die vereinfachte darstellung
+        echo "<p>Durchschnittlicher PAL: " . round($durchschnitt_pal, 2) . "</p>";
+        echo "<p>Täglicher Kalorienbedarf: " . round($kalorienbedarf, 2) . " kcal</p>";
+        echo "<p>Zum Abnehmen: " . round($kalorienbedarf - 400, 2) . " kcal</p>";
+        echo "<p>Zum Zunehmen: " . round($kalorienbedarf + 400, 2) . " kcal</p>";
+    } else {
+    ?>
+        <form method="post" action="">
+            <label for="geschlecht">Geschlecht:</label>
+            <select name="geschlecht" id="geschlecht">
+                <option value="maennlich">Männlich</option>
+                <option value="weiblich">Weiblich</option>
+            </select><br><br>
+            <label for="alter">Alter:</label>
+            <input type="number" name="alter" id="alter" required><br><br>
+            <label for="gewicht">Gewicht (kg):</label>
+            <input type="number" step="0.1" name="gewicht" id="gewicht" required><br><br>
+            <label for="groesse">Größe (cm):</label>
+            <input type="number" step="0.1" name="groesse" id="groesse" required><br><br>
+            <label for="schlafen">Schlafen (h):</label>
+            <input type="number" step="0.1" name="schlafen" id="schlafen" required><br><br>
+            <label for="sitzen">Sitzen (h):</label>
+            <input type="number" step="0.1" name="sitzen" id="sitzen" required><br><br>
+            <label for="buero">Büroarbeit (h):</label>
+            <input type="number" step="0.1" name="buero" id="buero" required><br><br>
+            <label for="stehen">Stehen/Gehen (h):</label>
+            <input type="number" step="0.1" name="stehen" id="stehen" required><br><br>
+            <button type="submit">Berechnen</button>
+        </form>
+    <?php
+    }
+    ?>
+</body>
+</html>
